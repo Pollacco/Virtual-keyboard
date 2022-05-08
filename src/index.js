@@ -1,6 +1,7 @@
 import './style.css'
 
 import { get } from './storage.js';
+import Keyboard from './Keyboard.js';
 
 const keyOrder = [
   ['Backquote', 'Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6', 'Digit7', 'Digit8', 'Digit9', 'Digit0', 'Minus', 'Equal', 'Delete'],
@@ -12,4 +13,4 @@ const keyOrder = [
 
 const lang = get('kbLang', '"ru"');
 
-new Keyboard(keyOrder).init(lang);
+new Keyboard(keyOrder).init(lang).generateLayout();
