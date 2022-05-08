@@ -7,6 +7,11 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
+  mode: 'development',
+  devServer: {
+    static: './dist',
+    port: 3002
+  },
   plugins: [
     new HtmlWebpackPlugin({
         title: 'Virtual Keyboard',
@@ -19,6 +24,10 @@ module.exports = {
       {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"],
+      },
+      {
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
       },
     ],
   },
