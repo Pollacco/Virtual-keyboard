@@ -7,7 +7,7 @@
  */
 
 export default function create(el, classNames, child, parent, ...dataAttr) {
-    let element = null;
+    let element = null
     try {
         element = document.createElement(el);
     } catch (error) {
