@@ -60,8 +60,9 @@ export default class Keyboard {
 
       keyObj.div.classList.add('active')
 
-      if (code.match(/Control/)) this.ctrlKey = true
-      if (code.match(/Alt/)) this.altKey = true
+      if (code.match(/Shift/)) this.shiftKey = false
+      if (code.match(/Control/)) this.ctrlKey = false
+      if (code.match(/Alt/)) this.altKey = false
 
       if (code.match(/Control/) && this.altKey) this.switchLanguage();
       if (code.match(/Alt/) && this.ctrlKey) this.switchLanguage();
@@ -108,5 +109,51 @@ export default class Keyboard {
 
   printToOutput = (keyObj, symbol) => {
     console.log(symbol)
+    let cursorPos = this.output.selectionStart
+    const left = this.output.value.slice(0, cursorPos)
+    const right = this.output.value.slice(cursorPos)
+
+    const fnButtonsHandler = {
+      Tab: () => {
+        this.output.value = `${left}\t${right}`
+        cursorPos += 1
+      },
+      ArrowLeft: () => {
+        cursorPos = cursorPos - 1 >= 0 ? cursorPos - 1 : 0
+      },
+      ArrowRight: () => {
+        cursorPos += 1
+      },
+      ArrowUp: () => {
+        const positionFromLeft = this.output.value.slice(0, cursorPos).match(/(\n).*$(?!\1)/g) || [[1]]
+        cursorPos -= positionFromLeft[0].length
+      },
+      ArrowDown: () => {
+        const positionFromLeft = this.output.value.slice(cursorPos).match(/^.*(\n).*(?!\1)/) || [[1]]
+        cursorPos += positionFromLeft[0].length
+      },
+      Enter: () => {
+        this.output.value = `${left}\n${right}`
+        cursorPos += 1;
+      },
+      Delete: () => {
+        this.output.value = `${left}${right.slice(1)}`
+      },
+      Backspace: () => {
+        this.output.value = `${left.slice(0, -1)}${right}`
+        cursorPos -= 1
+      },
+      Space: () => {
+        this.output.value = `${left} ${right}`
+        cursorPos += 1
+      }
+    }
+
+    if (fnButtonsHandler[keyObj.code]) fnButtonsHandler[keyObj.code]();
+    else if (!keyObj.isFnKey) {
+      cursorPos += 1;
+      this.output.value = `${left}${symbol || ''}${right}`;
+    }
+    this.output.setSelectionRange(cursorPos, cursorPos);
   }
 } 
