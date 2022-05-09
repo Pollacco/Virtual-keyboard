@@ -49,19 +49,32 @@ export default class Keyboard {
   handleEvent = (e) => {
     if (e.stopPropagation) e.stopPropagation()
     const { code, type } = e
-    const keyobj = this.keyButtons.find((key) => key.code === code)
-    if (!keyobj) return
+    const keyObj = this.keyButtons.find((key) => key.code === code)
+    if (!keyObj) return
     this.output.focus()
 
     if (type.match(/keydown|mousedown/)) {
       if (type.match(/key/)) e.preventDefault()
-      keyobj.div.classList.add('active')
+
+      if (code.match(/Shift/)) this.shiftKey = true;
+
+      keyObj.div.classList.add('active')
 
       if (code.match(/Control/)) this.ctrlKey = true
       if (code.match(/Alt/)) this.altKey = true
 
       if (code.match(/Control/) && this.altKey) this.switchLanguage();
       if (code.match(/Alt/) && this.ctrlKey) this.switchLanguage();
+
+      if (!this.isCaps) {
+        this.printToOutput(keyObj, this.shiftKey ? keyObj.shift : keyObj.small)
+      } else if (this.isCaps) {
+        if (this.shiftKey) {
+          this.printToOutput(keyObj, this.shiftKey ? keyObj.shift : keyObj.small)
+        } else {
+          this.printToOutput(keyObj, this.shiftKey ? !keyObj.shift : keyObj.small)
+        }
+      }
 
     } else if (type.match(/keyup|mouseup/)) {
       keyobj.div.classList.remove('active')
@@ -91,5 +104,9 @@ export default class Keyboard {
       }
       button.letter.innerHTML = keyObj.small;
     });
+  }
+
+  printToOutput = (keyObj, symbol) => {
+    console.log(symbol)
   }
 } 
