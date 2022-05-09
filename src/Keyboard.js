@@ -5,7 +5,8 @@ import Key from './Key.js'
 
 const main = create('main', '',
   [ create('h1', 'title', 'My Virtual Keyboard'),
-    create('h3', 'subtitle', 'Virtual Keyboard for RSS-school task')])
+    create('h3', 'subtitle', 'Virtual Keyboard for RSS-school task'),
+    create('p', 'hint', 'Use left <b>Ctrl</b> + <b>Alt</b> to switch language. Last language saves in localStorage') ])
 
 export default class Keyboard {
   constructor(keysOrder) {
@@ -68,7 +69,8 @@ export default class Keyboard {
     if (type.match(/keydown|mousedown/)) {
       if (type.match(/key/)) e.preventDefault()
 
-      if (code.match(/Shift/)) this.shiftKey = true;
+      if (code.match(/Shift/)) this.shiftKey = true
+
       if (this.shiftKey) this.switchUpperCase(true)
 
       keyObj.div.classList.add('active')
@@ -85,8 +87,8 @@ export default class Keyboard {
       if (code.match(/Control/)) this.ctrlKey = true
       if (code.match(/Alt/)) this.altKey = true
 
-      if (code.match(/Control/) && this.altKey) this.switchLanguage();
-      if (code.match(/Alt/) && this.ctrlKey) this.switchLanguage();
+      if (code.match(/Control/) && this.altKey) this.switchLanguage()
+      if (code.match(/Alt/) && this.ctrlKey) this.switchLanguage()
 
       if (!this.isCaps) {
         this.printToOutput(keyObj, this.shiftKey ? keyObj.shift : keyObj.small)
@@ -97,7 +99,6 @@ export default class Keyboard {
           this.printToOutput(keyObj, !keyObj.sub.innerHTML ? keyObj.shift : keyObj.small)
         }
       }
-
       this.keysPressed[keyObj.code] = keyObj
 
     } else if (type.match(/keyup|mouseup/)) {     
@@ -105,11 +106,30 @@ export default class Keyboard {
         this.shiftKey = false
         this.switchUpperCase(false)
       } 
-      if (code.match(/Control/)) this.ctrlKey = true
-      if (code.match(/Alt/)) this.altKey = true
+      if (code.match(/Control/)) this.ctrlKey = false
+      if (code.match(/Alt/)) this.altKey = false
 
       if (!code.match(/Caps/)) keyObj.div.classList.remove('active')
     }
+  }
+
+  resetButtonState = ({ target: { dataset: { code } } }) => {
+    if (code.match('Shift')) {
+      this.shiftKey = false
+      this.switchUpperCase(false)
+      this.keysPressed[code].div.classList.remove('active')
+    }
+    if (code.match(/Control/)) this.ctrKey = false
+    if (code.match(/Alt/)) this.altKey = false
+    this.resetPressedButtons(code)
+    this.output.focus()
+  }
+
+  resetPressedButtons = (targetCode) => {
+    if (!this.keysPressed[targetCode]) return
+    if (!this.isCaps) this.keysPressed[targetCode].div.classList.remove('active')
+    this.keysPressed[targetCode].div.removeEventListener('mouseleave', this.resetButtonState)
+    delete this.keysPressed[targetCode]
   }
 
   switchUpperCase(isTrue) {
@@ -134,6 +154,7 @@ export default class Keyboard {
         if (button.sub.innerHTML && !button.isFnKey) {
           button.sub.classList.remove('sub-active')
           button.letter.classList.remove('sub-inactive')
+
           if (!this.isCaps) {
             button.letter.innerHTML = button.small
           } else if (!this.isCaps) {
@@ -147,34 +168,33 @@ export default class Keyboard {
           }
         }
       })
-    }    
+    }
   }
 
   switchLanguage = () => {
-    const langAbbr = Object.keys(language);
-    let langIdx = langAbbr.indexOf(this.container.dataset.language);
-    this.keyBase = langIdx + 1 < langAbbr.length ? language[langAbbr[langIdx += 1]]
-      : language[langAbbr[langIdx -= langIdx]];
+    const langAbbr = Object.keys(language)
+    let langIdx = langAbbr.indexOf(this.container.dataset.language)
+    this.keyBase = langIdx + 1 < langAbbr.length ? language[langAbbr[langIdx += 1]] : language[langAbbr[langIdx -= langIdx]]
 
-    this.container.dataset.language = langAbbr[langIdx];
-    storage.set('kbLang', langAbbr[langIdx]);
+    this.container.dataset.language = langAbbr[langIdx]
+    storage.set('kbLang', langAbbr[langIdx])
+
     this.keyButtons.forEach((button) => {
-      const keyObj = this.keyBase.find((key) => key.code === button.code);
-      if (!keyObj) return;
-      button.shift = keyObj.shift;
-      button.small = keyObj.small;
+      const keyObj = this.keyBase.find((key) => key.code === button.code)
+      if (!keyObj) return
+      button.shift = keyObj.shift
+      button.small = keyObj.small
       if (keyObj.shift && keyObj.shift.match(/[^a-zA-Zа-яА-ЯёЁ0-9]/g)) {
-        button.sub.innerHTML = keyObj.shift;
+        button.sub.innerHTML = keyObj.shift
       } else {
-        button.sub.innerHTML = '';
+        button.sub.innerHTML = ''
       }
-      button.letter.innerHTML = keyObj.small;
-    });
+      button.letter.innerHTML = keyObj.small
+    })
     if (this.isCaps) this.switchUpperCase(true)
   }
 
   printToOutput = (keyObj, symbol) => {
-    console.log(symbol)
     let cursorPos = this.output.selectionStart
     const left = this.output.value.slice(0, cursorPos)
     const right = this.output.value.slice(cursorPos)
@@ -200,7 +220,7 @@ export default class Keyboard {
       },
       Enter: () => {
         this.output.value = `${left}\n${right}`
-        cursorPos += 1;
+        cursorPos += 1
       },
       Delete: () => {
         this.output.value = `${left}${right.slice(1)}`
@@ -215,11 +235,11 @@ export default class Keyboard {
       }
     }
 
-    if (fnButtonsHandler[keyObj.code]) fnButtonsHandler[keyObj.code]();
+    if (fnButtonsHandler[keyObj.code]) fnButtonsHandler[keyObj.code]()
     else if (!keyObj.isFnKey) {
-      cursorPos += 1;
-      this.output.value = `${left}${symbol || ''}${right}`;
+      cursorPos += 1
+      this.output.value = `${left}${symbol || ''}${right}`
     }
-    this.output.setSelectionRange(cursorPos, cursorPos);
+    this.output.setSelectionRange(cursorPos, cursorPos)
   }
-} 
+}
