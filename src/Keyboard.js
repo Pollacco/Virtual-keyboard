@@ -44,6 +44,18 @@ export default class Keyboard {
 
     document.addEventListener('keydown', this.handleEvent)
     document.addEventListener('keyup', this.handleEvent)
+    this.container.onmousedown = this.preHandleEvent
+    this.container.onmouseup = this.preHandleEvent
+  }
+
+  preHandleEvent = (e) => {
+    e.stopPropagation()
+    const keyDiv = e.target.closest('.keyboard__key')
+    if (!keyDiv) return
+
+    const { dataset: { code } } = keyDiv
+    keyDiv.addEventListener('mouseleave', this.resetButtonState)
+    this.handleEvent({ code, type: e.type })
   }
 
   handleEvent = (e) => {
@@ -87,7 +99,7 @@ export default class Keyboard {
       }
 
       this.keysPressed[keyObj.code] = keyObj
-      
+
     } else if (type.match(/keyup|mouseup/)) {     
       if (code.match(/Shift/)) {
         this.shiftKey = false
@@ -158,6 +170,7 @@ export default class Keyboard {
       }
       button.letter.innerHTML = keyObj.small;
     });
+    if (this.isCaps) this.switchUpperCase(true)
   }
 
   printToOutput = (keyObj, symbol) => {
