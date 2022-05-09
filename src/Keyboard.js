@@ -41,6 +41,23 @@ export default class Keyboard {
         }
       })
     })
+
+    document.addEventListener('keydown', this.handleEvent)
+    document.addEventListener('keyup', this.handleEvent)
   }
 
+  handleEvent = (e) => {
+    if (e.stopPropagation) e.stopPropagation()
+    const { code, type } = e
+    const keyobj = this.keyButtons.find((key) => key.code === code)
+    if (!keyobj) return
+    this.output.focus()
+
+    if (type.match(/keydown|mousedown/)) {
+      if (type.match(/key/)) e.preventDefault()
+      keyobj.div.classList.add('active')
+    } else if (type.match(/keyup|mouseup/)) {
+      keyobj.div.classList.remove('active')
+    }
+  }
 } 
