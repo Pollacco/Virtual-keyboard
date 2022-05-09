@@ -77,11 +77,15 @@ export default class Keyboard {
         }
       }
 
-    } else if (type.match(/keyup|mouseup/)) {
-      keyobj.div.classList.remove('active')
-
+    } else if (type.match(/keyup|mouseup/)) {     
+      if (code.match(/Shift/)) {
+        this.shiftKey = false
+        this.switchUpperCase(false)
+      } 
       if (code.match(/Control/)) this.ctrlKey = true
       if (code.match(/Alt/)) this.altKey = true
+
+      keyObj.div.classList.remove('active')
     }
   }
 
@@ -102,7 +106,25 @@ export default class Keyboard {
           button.letter.innerHTML = button.shift
         }
       })
-    } 
+    } else {
+      this.keyButtons.forEach((button) => {
+        if (button.sub.innerHTML && !button.isFnKey) {
+          button.sub.classList.remove('sub-active')
+          button.letter.classList.remove('sub-inactive')
+          if (!this.isCaps) {
+            button.letter.innerHTML = button.small
+          } else if (!this.isCaps) {
+            button.letter.innerHTML = button.shift
+          }
+        } else if (!button.isFnKey) {
+          if (this.isCaps) {
+            button.letter.innerHTML = button.shift
+          } else {
+            button.letter.innerHTML = button.small
+          }
+        }
+      })
+    }    
   }
 
   switchLanguage = () => {
