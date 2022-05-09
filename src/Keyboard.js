@@ -61,8 +61,17 @@ export default class Keyboard {
 
       keyObj.div.classList.add('active')
 
-      if (code.match(/Control/)) this.ctrlKey = false
-      if (code.match(/Alt/)) this.altKey = false
+      if (code.match(/Caps/) && !this.isCaps) {
+        this.isCaps = true
+        this.switchUpperCase(true)
+      } else if (code.match(/Caps/) && this.isCaps) {
+        this.isCaps = false
+        this.switchUpperCase(false)
+        keyObj.div.classList.remove('active')
+      }
+
+      if (code.match(/Control/)) this.ctrlKey = true
+      if (code.match(/Alt/)) this.altKey = true
 
       if (code.match(/Control/) && this.altKey) this.switchLanguage();
       if (code.match(/Alt/) && this.ctrlKey) this.switchLanguage();
@@ -71,12 +80,14 @@ export default class Keyboard {
         this.printToOutput(keyObj, this.shiftKey ? keyObj.shift : keyObj.small)
       } else if (this.isCaps) {
         if (this.shiftKey) {
-          this.printToOutput(keyObj, this.shiftKey ? keyObj.shift : keyObj.small)
+          this.printToOutput(keyObj, keyObj.sub.innerHTML ? keyObj.shift : keyObj.small)
         } else {
-          this.printToOutput(keyObj, this.shiftKey ? !keyObj.shift : keyObj.small)
+          this.printToOutput(keyObj, !keyObj.sub.innerHTML ? keyObj.shift : keyObj.small)
         }
       }
 
+      this.keysPressed[keyObj.code] = keyObj
+      
     } else if (type.match(/keyup|mouseup/)) {     
       if (code.match(/Shift/)) {
         this.shiftKey = false
@@ -85,7 +96,7 @@ export default class Keyboard {
       if (code.match(/Control/)) this.ctrlKey = true
       if (code.match(/Alt/)) this.altKey = true
 
-      keyObj.div.classList.remove('active')
+      if (!code.match(/Caps/)) keyObj.div.classList.remove('active')
     }
   }
 
