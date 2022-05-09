@@ -56,8 +56,40 @@ export default class Keyboard {
     if (type.match(/keydown|mousedown/)) {
       if (type.match(/key/)) e.preventDefault()
       keyobj.div.classList.add('active')
+
+      if (code.match(/Control/)) this.ctrlKey = true
+      if (code.match(/Alt/)) this.altKey = true
+
+      if (code.match(/Control/) && this.altKey) this.switchLanguage();
+      if (code.match(/Alt/) && this.ctrlKey) this.switchLanguage();
+
     } else if (type.match(/keyup|mouseup/)) {
       keyobj.div.classList.remove('active')
+
+      if (code.match(/Control/)) this.ctrlKey = false
+      if (code.match(/Alt/)) this.altKey = false
     }
+  }
+
+  switchLanguage = () => {
+    const langAbbr = Object.keys(language);
+    let langIdx = langAbbr.indexOf(this.container.dataset.language);
+    this.keyBase = langIdx + 1 < langAbbr.length ? language[langAbbr[langIdx += 1]]
+      : language[langAbbr[langIdx -= langIdx]];
+
+    this.container.dataset.language = langAbbr[langIdx];
+    storage.set('kbLang', langAbbr[langIdx]);
+    this.keyButtons.forEach((button) => {
+      const keyObj = this.keyBase.find((key) => key.code === button.code);
+      if (!keyObj) return;
+      button.shift = keyObj.shift;
+      button.small = keyObj.small;
+      if (keyObj.shift && keyObj.shift.match(/[^a-zA-Zа-яА-ЯёЁ0-9]/g)) {
+        button.sub.innerHTML = keyObj.shift;
+      } else {
+        button.sub.innerHTML = '';
+      }
+      button.letter.innerHTML = keyObj.small;
+    });
   }
 } 
